@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Unity WebGL Player | HamsterHotel</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script type="text/javascript">
+        function sendUserIdToUnity() {
+            function checkTelegramWebAppReady() {
+                return new Promise((resolve) => {
+                    const interval = setInterval(() => {
+                        if (window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
+                            clearInterval(interval);
+                            resolve(window.Telegram.WebApp);
+                        }
+                    }, 100);
+                });
+            }
+            checkTelegramWebAppReady().then((tg) => {
+                let userId = tg.initDataUnsafe.user.id;
+                let userIdStr = userId.toString();
+                
+                let userUsernameStr = tg.initDataUnsafe.user.username;
+                let userPhotoUrlStr = tg.initDataUnsafe.user.photo_url;
+                
+                let userReferalStr = tg.initDataUnsafe.start_param;
+                
+                
+                let combinedData = userIdStr + ";" + userUsernameStr + ";" + userReferalStr;
+                gameInstance.SendMessage('IDReceiver', 'ReceiveUserInfo', combinedData);
+                
+                setTimeout(() => {
+                    document.getElementById('loading-screen-02').style.display = 'none';
+                }, 2000);
+                
+                tg.expand();
+            });
+        }
+    </script>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            text-align: center;
+            background-color: #F0C636;
+        }
+        #loading-screen-01 {
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #F0C636;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+        
+        #loading-screen-02 {
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #F0C636;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        #loading-screen-01 img, #loading-screen-02 img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        #unity-canvas {
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: #F0C636;
+            z-index: 9998;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading-screen-01">
+        <img src="Build/LoadingScreen_01.png" alt="Loading...">
+    </div>
+    <div id="loading-screen-02">
+        <img src="Build/LoadingScreen_02.png" alt="Loading...">
+    </div>
+    <canvas id="unity-canvas" tabindex="-1"></canvas>
+    <script src="Build/something-build-testonly.loader.js"></script>
+    <script>
+        createUnityInstance(document.querySelector("#unity-canvas"), {
+            dataUrl: "Build/something-build-testonly.data",
+            frameworkUrl: "Build/something-build-testonly.framework.js",
+            codeUrl: "Build/something-build-testonly.wasm",
+            streamingAssetsUrl: "StreamingAssets",
+            companyName: "DefaultCompany",
+            productName: "HamsterHotel",
+            productVersion: "1.0",
+        }).then((unityInstance) => {
+            window.gameInstance = unityInstance;
+            document.getElementById('loading-screen-01').style.display = 'none';
+            setTimeout(() => {
+                
+                document.getElementById('loading-screen-02').style.display = 'none';
+                let unityLogo = document.querySelector('.unity-logo');
+                if (unityLogo) {
+                    unityLogo.style.display = 'none';
+                }
+            }, 2000);
+            sendUserIdToUnity();
+        });
+    </script>
+</body>
+</html>
